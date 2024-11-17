@@ -1,101 +1,136 @@
-import Image from "next/image";
+"use client";
+import { useState } from "react";
+import { useChat } from "ai/react";
+import {
+  Box,
+  Grid,
+  GridItem,
+  Heading,
+  Textarea,
+  HStack,
+  Icon,
+} from "@chakra-ui/react";
+import { Button } from "@/components/ui/button";
+import { Toaster, toaster } from "@/components/ui/toaster";
+import { FaCheckCircle } from "react-icons/fa";
+import { useTheme } from "next-themes";
+
+import Step1 from "@/app/components/Step1";
+import Step2 from "@/app/components/Step2";
+import OPeachHeader from "./components/OPeachHeader";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [aboutJob, setAboutJob] = useState("");
+  const [aboutCompany, setAboutCompany] = useState("");
+  const [resume, setResume] = useState("");
+  const { theme } = useTheme();
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+  const { setInput, handleSubmit, messages } = useChat();
+  const responseMessages = messages.filter((m) => m.role === "assistant");
+  const latestMessage = responseMessages[responseMessages.length - 1];
+  console.log(messages);
+  console.log(latestMessage);
+
+  const onGenerate = async () => {
+    if (!resume) {
+      return toaster.error({
+        title: "Info Needed.",
+        description: "You need to upload or paste your resume above",
+        duration: 5000,
+        action: {
+          label: "Close",
+          onClick: () => {},
+        },
+      });
+    } else if (!aboutJob) {
+      return toaster.error({
+        title: "Info Needed.",
+        description: "You need to paste the job descrption above",
+        duration: 5000,
+        action: {
+          label: "Close",
+          onClick: () => {},
+        },
+      });
+    } else if (!aboutCompany) {
+      return toaster.error({
+        title: "Info Needed.",
+        description: "You need to paste the company descrption above",
+        duration: 5000,
+        action: {
+          label: "Close",
+          onClick: () => {},
+        },
+      });
+    }
+    handleSubmit();
+  };
+
+  return (
+    <div
+      className={`${
+        theme === "light"
+          ? "bg-slate-200 text-slate-900"
+          : "bg-slate-900 text-slate-200"
+      }`}
+    >
+      <OPeachHeader />
+
+      <form
+        onSubmit={() => {
+          onGenerate();
+        }}
+      >
+        <Grid
+          templateColumns={["1fr", "1fr", "repeat(2, 1fr)", "repeat(2, 1fr)"]}
+          gap={10}
+          h="full"
+          px={[4, 4, 12, 48]}
+          pb={32}
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          <GridItem w="100%">
+            <Step1
+              onEnterResume={(value) => {
+                setResume(value);
+                setInput(JSON.stringify([value, aboutJob, aboutCompany]));
+              }}
+            ></Step1>
+            <Step2
+              setAboutJob={(value) => {
+                setAboutJob(value);
+                setInput(JSON.stringify([resume, value, aboutCompany]));
+              }}
+              setAboutCompany={(value) => {
+                setAboutCompany(value);
+                setInput(JSON.stringify([resume, aboutJob, value]));
+              }}
+            ></Step2>
+          </GridItem>
+          <GridItem w="100%">
+            <Box py="8" h="100%">
+              <HStack justifyContent="space-between">
+                <Heading color="text" my="6">
+                  Cover Letter
+                </Heading>
+                <Button colorPalette="blue" onClick={onGenerate}>
+                  <Icon className="mr-2">
+                    <FaCheckCircle />
+                  </Icon>
+                  Generate
+                </Button>
+              </HStack>
+
+              <Textarea
+                height="90%"
+                variant="subtle"
+                value={latestMessage?.content}
+                readOnly
+              />
+            </Box>
+          </GridItem>
+        </Grid>
+      </form>
+      <Toaster />
     </div>
   );
 }
