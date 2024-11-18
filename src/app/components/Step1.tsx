@@ -1,4 +1,10 @@
-import React, { MutableRefObject, useRef, useState } from "react";
+"use client";
+import React, {
+  MutableRefObject,
+  SyntheticEvent,
+  useRef,
+  useState,
+} from "react";
 
 import { FaLink } from "react-icons/fa6";
 import {
@@ -12,11 +18,10 @@ import {
 } from "@chakra-ui/react";
 
 import { useTheme } from "next-themes";
-
+import { usePDFJS } from "../hooks/usePDFJS";
 import { Radio, RadioGroup } from "@/components/ui/radio";
 import { DOMParser } from "@xmldom/xmldom";
 import { PDFDocumentLoadingTask } from "pdfjs-dist/types/src/display/api";
-import * as pdfJsLib from "pdfjs-dist/webpack.mjs";
 import PizZip from "pizzip";
 
 import { madeupTextForPDF } from "@/app/util/util";
@@ -27,11 +32,20 @@ type propType = {
 
 const Step1 = (props: propType) => {
   const fileInputRef: MutableRefObject<HTMLInputElement> = useRef();
-  const [tabIndex, setTabIndex] = useState("0");
+  const [tabIndex, setTabIndex] = useState("upload");
   const [editingResume, setEditingResume] = useState("");
   const { theme } = useTheme();
-  pdfJsLib.GlobalWorkerOptions.workerSrc =
-    "../../build/webpack/pdf.worker.bundle.js";
+  const [pdf, setPDF] = useState<ArrayBuffer>();
+
+  usePDFJS(async (pdfLoader) => {
+    if (!pdf) return;
+    const pdfDocTask = pdfLoader.getDocument(pdf);
+    const pdfDoc = await pdfDocTask.promise;
+    const data = await madeupTextForPDF(pdfDoc);
+    props.onEnterResume(data);
+    setTabIndex("text");
+    setEditingResume(data);
+  });
 
   const str2xml = (str: string) => {
     if (str.charCodeAt(0) === 65279) {
@@ -42,7 +56,7 @@ const Step1 = (props: propType) => {
   };
 
   // Get paragraphs as javascript array
-  const getParagraphs = (content) => {
+  const getParagraphs = (content: ArrayBuffer) => {
     const zip = new PizZip(content);
     const xml = str2xml(zip.files["word/document.xml"].asText());
     const paragraphsXml = xml.getElementsByTagName("w:p");
@@ -64,34 +78,41 @@ const Step1 = (props: propType) => {
     return paragraphs.join("\n");
   };
 
-  const onFileUpload = (event) => {
+  const onFileUpload = async (event) => {
+    console.log(typeof event);
     const reader = new FileReader();
     const file = event.target.files[0];
+    if (file.type === "text/plain") {
+      reader.readAsText(file);
+    } else {
+      reader.readAsArrayBuffer(file);
+    }
+
     reader.onload = async (e) => {
       const target = e.target;
       const content = target?.result;
       let result = "";
       fileInputRef.current.value = "";
 
-      if (file.type == "application/pdf") {
-        const pdfData = new Uint8Array(content as ArrayBufferLike);
-        const pdfLoadingTask: PDFDocumentLoadingTask =
-          pdfJsLib.getDocument(pdfData);
+      console.log(file.type);
+      console.log(content);
 
-        const pdfDocument = await pdfLoadingTask.promise;
-        result = await madeupTextForPDF(pdfDocument);
-        console.log(result);
+      if (file.type === "text/plain") {
+        props.onEnterResume(content as string);
+        setTabIndex("text");
+        setEditingResume(content as string);
+      } else if (file.type === "application/pdf") {
+        setPDF(content as ArrayBuffer);
       } else {
-        result = getParagraphs(content);
+        result = getParagraphs(content as ArrayBuffer);
+        props.onEnterResume(result);
+        setTabIndex("text");
+        setEditingResume(result);
       }
-      props.onEnterResume(result);
-      setTabIndex(1);
-      setEditingResume(result);
     };
     reader.onerror = (err) => {
       console.error(err);
     };
-    reader.readAsArrayBuffer(file);
   };
 
   return (

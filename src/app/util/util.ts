@@ -7,7 +7,6 @@ export const madeupTextForPDF = async (pdfDocument: PDFDocumentProxy) => {
     const page = await pdfDocument.getPage(i);
     const textContent = await page.getTextContent();
     textContent.items.forEach((textItem) => {
-      console.log(textItem);
       if ((textItem as TextItem).height) {
         texts += (textItem as TextItem).str;
         if ((textItem as TextItem).str) {
@@ -16,7 +15,5 @@ export const madeupTextForPDF = async (pdfDocument: PDFDocumentProxy) => {
       }
     });
   }
-  // pdfDocument
-
   return texts;
 };
