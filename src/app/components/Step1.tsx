@@ -1,10 +1,5 @@
 "use client";
-import React, {
-  MutableRefObject,
-  SyntheticEvent,
-  useRef,
-  useState,
-} from "react";
+import React, { MutableRefObject, useRef, useState } from "react";
 
 import { FaLink } from "react-icons/fa6";
 import {
@@ -21,7 +16,6 @@ import { useTheme } from "next-themes";
 import { usePDFJS } from "../hooks/usePDFJS";
 import { Radio, RadioGroup } from "@/components/ui/radio";
 import { DOMParser } from "@xmldom/xmldom";
-import { PDFDocumentLoadingTask } from "pdfjs-dist/types/src/display/api";
 import PizZip from "pizzip";
 
 import { madeupTextForPDF } from "@/app/util/util";
