@@ -1,5 +1,5 @@
 "use client";
-import React, { MutableRefObject, useRef, useState } from "react";
+import React, { SyntheticEvent, useRef, useState } from "react";
 
 import { FaLink } from "react-icons/fa6";
 import {
@@ -25,7 +25,7 @@ type propType = {
 };
 
 const Step1 = (props: propType) => {
-  const fileInputRef: MutableRefObject<HTMLInputElement> = useRef();
+  const fileInputRef = useRef();
   const [tabIndex, setTabIndex] = useState("upload");
   const [editingResume, setEditingResume] = useState("");
   const { theme } = useTheme();
@@ -72,10 +72,13 @@ const Step1 = (props: propType) => {
     return paragraphs.join("\n");
   };
 
-  const onFileUpload = async (event) => {
-    console.log(typeof event);
+  const onFileUpload = async (event: SyntheticEvent) => {
     const reader = new FileReader();
-    const file = event.target.files[0];
+    const target = event.target as HTMLInputElement;
+    if (!target.files) {
+      return;
+    }
+    const file = target.files[0];
     if (file.type === "text/plain") {
       reader.readAsText(file);
     } else {
@@ -83,10 +86,12 @@ const Step1 = (props: propType) => {
     }
 
     reader.onload = async (e) => {
-      const target = e.target;
+      const target = e.target as FileReader;
       const content = target?.result;
       let result = "";
-      fileInputRef.current.value = "";
+      if (fileInputRef.current) {
+        (fileInputRef.current as HTMLInputElement).value = "";
+      }
 
       console.log(file.type);
       console.log(content);
