@@ -1,5 +1,5 @@
 "use client";
-import React, { SyntheticEvent, useRef, useState } from "react";
+import React, { SyntheticEvent, useState } from "react";
 
 import { FaLink } from "react-icons/fa6";
 import {
@@ -25,7 +25,7 @@ type propType = {
 };
 
 const Step1 = (props: propType) => {
-  const fileInputRef = useRef();
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [tabIndex, setTabIndex] = useState("upload");
   const [editingResume, setEditingResume] = useState("");
   const { theme } = useTheme();
