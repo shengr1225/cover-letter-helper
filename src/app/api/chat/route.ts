@@ -18,7 +18,7 @@ export async function POST(req: Request) {
     },
     {
       role: "user",
-      content: "here is the company describtion: " + contents[2],
+      content: "here is the company description: " + contents[2],
     },
     { role: "user", content: "here is my resume: " + contents[0] },
   ];
